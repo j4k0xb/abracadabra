@@ -225,10 +225,22 @@ doSomethingElse();`,
   if (index > 2) [cursor]console.log(index);
 }`,
         expected: `for (let index = 0; index < 5; index++) {
-  if (index <= 2) {
-    continue;
-  }
+  if (index <= 2) continue;
   console.log(index);
+}`
+      },
+      {
+        description: "guard clause in a function in a loop",
+        code: `for (let index = 0; index < 5; index++) {
+  setTimeout(() => {
+    if (index > 2) [cursor]console.log(index);
+  }, 10);
+}`,
+        expected: `for (let index = 0; index < 5; index++) {
+  setTimeout(() => {
+    if (index <= 2) return;
+    console.log(index);
+  }, 10);
 }`
       },
       {

@@ -20,9 +20,9 @@ export async function flipIfElse(editor: Editor) {
       // Until it's fixed, parse this pattern manually
       // https://github.com/benjamn/recast/issues/612
       .replace(/\)\n\s*{} else {/, ") {} else {")
-      // Created guard clause puts the return on the next line
+      // Created guard clause puts the return/continue on the next line
       // Make it one-line so it's easier to read
-      .replace(/(if\s+\(.*\))\n\s*return/, "$1 return")
+      .replace(/(if\s+\(.*\))\n\s*(return|continue)/, "$1 $2")
   );
 }
 
@@ -64,7 +64,7 @@ function flipIfStatement(path: t.NodePath<t.IfStatement>) {
   if (canBeTurnedIntoGuardClause(path)) {
     const body = t.getStatements(path.node.consequent);
     path.node.consequent = isInLoop(path)
-      ? t.blockStatement([t.continueStatement()])
+      ? t.continueStatement()
       : t.returnStatement();
     path.insertAfter(body);
   } else {
@@ -79,7 +79,13 @@ function flipIfStatement(path: t.NodePath<t.IfStatement>) {
 }
 
 function isInLoop(path: t.NodePath): boolean {
-  return Boolean(path.findParent((parentPath) => parentPath.isLoop()));
+  return Boolean(
+    path
+      .findParent(
+        (parentPath) => parentPath.isLoop() || parentPath.isFunction()
+      )
+      ?.isLoop()
+  );
 }
 
 function canBeTurnedIntoGuardClause(path: t.NodePath<t.IfStatement>): boolean {
