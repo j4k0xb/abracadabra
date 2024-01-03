@@ -66,6 +66,11 @@ const lastName = "Doe";`
         expected: "const a = `Hello \\`you\\``"
       },
       {
+        description: "string literal with '${'",
+        code: `const a = "Hello[cursor] \${you}"`,
+        expected: `const a = \`Hello \\\${you}\``
+      },
+      {
         description: "preserves comments",
         code: `const name = 
   // leading comment
